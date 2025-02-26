@@ -16,15 +16,32 @@ def find_common_tangents_real(h1, k1, r1, h2, k2, r2):
 
     # Filter out complex solutions
     real_solutions = [sol for sol in solutions if not sol[m].has(I) and not sol[b].has(I)]
-
-    print(real_solutions)
+    print("Non-vertical tangents: ", real_solutions)
     
     return real_solutions
+
+# Function to find vertical tangents
+def find_vertical_solutions(h1, k1, r1, h2, k2, r2):
+    vertical_solutions = set()  # Use a set to store unique values
+    
+    if h1 - r1 == h2 - r2:
+        vertical_solutions.add(h1 - r1)
+    if h1 + r1 == h2 + r2:
+        vertical_solutions.add(h1 + r1)
+    if h1 + r1 == h2 - r2:
+        vertical_solutions.add(h1 + r1)
+    if h1 - r1 == h2 + r2:
+        vertical_solutions.add(h1 - r1)
+
+    print("Vertical tangents: ", vertical_solutions)
+    return vertical_solutions  # A set automatically ensures uniqueness
+
 
 # Function to plot circles and tangents with equal scaling
 def plot_common_tangents(h1, k1, r1, h2, k2, r2):
     # Solve for real common tangents
     solutions = find_common_tangents_real(h1, k1, r1, h2, k2, r2)
+    vertical_solutions = find_vertical_solutions(h1, k1, r1, h2, k2, r2)  # Get vertical tangents
 
     # Generate the circles
     theta = np.linspace(0, 2 * np.pi, 300)
@@ -39,7 +56,7 @@ def plot_common_tangents(h1, k1, r1, h2, k2, r2):
     plt.plot(circle2_x, circle2_y, 'g', label="Circle 2")
     plt.scatter([h1, h2], [k1, k2], color='black', marker='o', label="Centers")
 
-    # Plot the tangents
+    # Plot the sloped tangents
     x_vals = np.linspace(min(h1, h2) - r1 - r2, max(h1, h2) + r1 + r2, 100)
 
     for sol in solutions:
@@ -47,8 +64,15 @@ def plot_common_tangents(h1, k1, r1, h2, k2, r2):
         b_val = sol[symbols('b')].evalf()
 
         if m_val.is_finite and b_val.is_finite:
-            tangent_y = m_val * x_vals + b_val
-            plt.plot(x_vals, tangent_y, 'r--', label=f"Tangent: y={m_val:.2f}x + {b_val:.2f}")
+            if m_val == 0:  # Handle horizontal tangent
+                plt.axhline(y=b_val, color='r', linestyle='--', label=f"Tangent: y={b_val:.2f}")
+            else:
+                tangent_y = m_val * x_vals + b_val
+                plt.plot(x_vals, tangent_y, 'r--', label=f"Tangent: y={m_val:.2f}x + {b_val:.2f}")
+
+    # Plot the vertical tangents
+    for vt in vertical_solutions:
+        plt.axvline(x=vt, color='r', linestyle='--', label=f"Vertical Tangent at x={vt:.2f}")
 
     # Labels and legend
     plt.xlabel("X")
@@ -65,4 +89,4 @@ def plot_common_tangents(h1, k1, r1, h2, k2, r2):
     plt.show()
 
 # Example usage
-plot_common_tangents(1, 7, 6, 4, 5, 6)
+plot_common_tangents(1, 2, 3, 4, 5, 6)
